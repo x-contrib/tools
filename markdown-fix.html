@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown Transformer</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Added Marked.js CDN -->
     <style>
         body {
             font-family: sans-serif;
-            margin: 20px;
+            margin: 0; /* Adjusted for full width */
+            padding: 20px; /* Add padding to body instead of margin */
             display: flex;
             gap: 20px;
+            min-height: calc(100vh - 40px); /* Ensure body takes full viewport height */
         }
         .container {
             display: flex;
             flex-direction: column;
-            width: 45%;
+            width: calc(50% - 10px); /* Adjusted for 50/50 split considering the gap */
         }
         textarea, .preview {
             width: 100%;
@@ -41,14 +44,13 @@
     <div class="container">
         <h2>Transformed Output</h2>
         <textarea id="transformedOutput" readonly placeholder="Transformed Markdown will appear here..."></textarea>
-        <h2>Live Preview</h2>
-        <div id="livePreview" class="preview"></div>
+        <button id="renderExternalPreviewButton" style="margin-top: 10px;">Live Preview</button>
     </div>
 
     <script>
         const markdownInput = document.getElementById('markdownInput');
         const transformedOutput = document.getElementById('transformedOutput');
-        const livePreview = document.getElementById('livePreview');
+        const renderExternalPreviewButton = document.getElementById('renderExternalPreviewButton');
 
         function transformMarkdown(markdown) {
             let transformed = markdown;
@@ -59,35 +61,40 @@
             return transformed;
         }
 
-        function renderPreview(markdown) {
-            // Basic Markdown to HTML conversion for preview
-            // This is a very simplified renderer for demonstration
-            let html = markdown;
-
-            // Headers (e.g., ## Header)
-            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-
-
-            // For other markdown elements like lists, bold, italics, etc.,
-            // a more comprehensive library like Marked.js would be needed.
-            // For this example, we'll keep it simple.
-
-            livePreview.innerHTML = html;
-        }
-
         markdownInput.addEventListener('input', () => {
             const originalMarkdown = markdownInput.value;
             const transformedMarkdown = transformMarkdown(originalMarkdown);
             transformedOutput.value = transformedMarkdown;
-            renderPreview(transformedMarkdown); // Preview the transformed markdown
+        });
+
+        renderExternalPreviewButton.addEventListener('click', () => {
+            const markdownToRender = transformedOutput.value;
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Markdown Preview</title>
+                    <style>body { font-family: sans-serif; margin: 20px; }</style>
+                </head>
+                <body>
+                    <div id="content"></div>
+                    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+                    <script>
+                        const md = ${JSON.stringify(markdownToRender)};
+                        document.getElementById('content').innerHTML = marked.parse(md);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            previewWindow.document.close(); // Important for the new window to finish loading
         });
 
         // Initial transformation if there's any default text (though textarea is empty)
         const initialMarkdown = markdownInput.value;
         const initialTransformedMarkdown = transformMarkdown(initialMarkdown);
         transformedOutput.value = initialTransformedMarkdown;
-        renderPreview(initialTransformedMarkdown);
     </script>
 </body>
 </html>
