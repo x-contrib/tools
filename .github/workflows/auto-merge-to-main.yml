@@ -1,0 +1,44 @@
+# This workflow automatically merges branches starting with feat/, fix/, or bugfix/ into the main branch.
+# IMPORTANT: This workflow will FAIL if there are merge conflicts.
+# In such cases, conflicts must be resolved manually and the merge completed by hand.
+
+name: Auto Merge to Main
+
+on:
+  push:
+    branches:
+      - 'feat/**'
+      - 'fix/**'
+      - 'bugfix/**'
+  workflow_dispatch: # Allows manual triggering for testing if needed
+
+jobs:
+  merge-to-main:
+    runs-on: ubuntu-latest
+    # Grant permissions to write to contents (i.e., push to the repository)
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main # We want to merge into main
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+
+      - name: Fetch triggering branch and Merge
+        run: |
+          git fetch origin ${{ github.ref_name }} # Fetch the specific branch that triggered the workflow
+          # Attempt to merge the branch. If there are conflicts, this command will fail.
+          # --no-ff creates a merge commit even if fast-forward is possible, for clearer history.
+          git merge origin/${{ github.ref_name }} --no-ff -m "Auto-merge: ${{ github.ref_name }} into main"
+
+      - name: Push changes to main
+        run: |
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GITHUB_TOKEN is automatically available
