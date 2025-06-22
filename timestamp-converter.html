@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timestamp Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">Home</a>
+        </nav>
+        <h1>Timestamp &amp; Date Converter</h1>
+
+        <div class="converter-section">
+            <h2>Timestamp to Date</h2>
+            <div class="input-group">
+                <label for="timestamp-input">Unix Timestamp</label>
+                <input type="text" id="timestamp-input" placeholder="e.g., 1672531199">
+            </div>
+            <button onclick="convertTimestampToDate()">Convert to Date</button>
+            <div class="input-group">
+                <label for="date-output">Result (UTC)</label>
+                <input type="text" id="date-output" readonly>
+            </div>
+        </div>
+
+        <div class="converter-section">
+            <h2>Date to Timestamp</h2>
+            <div class="input-group">
+                <label for="date-input">Date String (UTC)</label>
+                <input type="text" id="date-input" placeholder="e.g., 2023-12-31 23:59:59">
+            </div>
+            <button onclick="convertDateToTimestamp()">Convert to Timestamp</button>
+            <div class="input-group">
+                <label for="timestamp-output">Result (Unix Timestamp)</label>
+                <input type="text" id="timestamp-output" readonly>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>What is a Unix Timestamp?</h3>
+            <p>A Unix timestamp (also known as Unix time, POSIX time, or Epoch time) is a system for describing a point in time. It is the number of seconds that have elapsed since the Unix epoch, which was at 00:00:00 UTC on 1 January 1970, minus leap seconds. It is widely used in operating systems and file formats.</p>
+        </div>
+    </div>
+
+    <script>
+        function convertTimestampToDate() {
+            const timestampInput = document.getElementById('timestamp-input').value;
+            const dateOutput = document.getElementById('date-output');
+            if (!timestampInput || isNaN(timestampInput)) {
+                dateOutput.value = 'Invalid timestamp';
+                return;
+            }
+            // Timestamps are in seconds, but JavaScript Date works with milliseconds
+            const date = new Date(parseInt(timestampInput, 10) * 1000);
+            dateOutput.value = date.toUTCString();
+        }
+
+        function convertDateToTimestamp() {
+            const dateInput = document.getElementById('date-input').value;
+            const timestampOutput = document.getElementById('timestamp-output');
+            const date = new Date(dateInput);
+            if (isNaN(date.getTime())) {
+                timestampOutput.value = 'Invalid date string';
+                return;
+            }
+            // getTime() returns milliseconds, so divide by 1000 for Unix timestamp
+            timestampOutput.value = Math.floor(date.getTime() / 1000);
+        }
+    </script>
+
+    <div class="footer">
+        <p>A simple tool by xiexianbin</p>
+    </div>
+</body>
+</html>

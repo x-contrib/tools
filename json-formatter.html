@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html">Home</a>
+        </nav>
+        <h1>JSON Formatter</h1>
+        <div class="io-container">
+            <div class="io-box">
+                <h2>Input JSON</h2>
+                <textarea id="json-input" placeholder="Paste your JSON here..."></textarea>
+            </div>
+            <div class="io-box">
+                <h2>Formatted JSON</h2>
+                <textarea id="json-output" readonly></textarea>
+            </div>
+        </div>
+        <button onclick="formatJson()">Format</button>
+        <button class="clear" onclick="clearIO()">Clear</button>
+
+        <div class="explanation">
+            <h3>What is JSON?</h3>
+            <p>JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write and easy for machines to parse and generate. It is based on a subset of the JavaScript Programming Language, Standard ECMA-262 3rd Edition - December 1999.</p>
+            <h3>How to use?</h3>
+            <p>Paste your unformatted or minified JSON into the input box and click the "Format" button to see the beautified, indented version.</p>
+        </div>
+    </div>
+
+    <script>
+        function formatJson() {
+            const input = document.getElementById('json-input').value;
+            const outputArea = document.getElementById('json-output');
+            try {
+                const parsed = JSON.parse(input);
+                outputArea.value = JSON.stringify(parsed, null, 4);
+                outputArea.style.color = '#212529';
+            } catch (error) {
+                outputArea.value = `Invalid JSON: ${error.message}`;
+                outputArea.style.color = 'red';
+            }
+        }
+
+        function clearIO() {
+            document.getElementById('json-input').value = '';
+            document.getElementById('json-output').value = '';
+            document.getElementById('json-output').style.color = '#212529';
+        }
+    </script>
+
+    <div class="footer">
+        <p>A simple tool by xiexianbin</p>
+    </div>
+</body>
+</html>

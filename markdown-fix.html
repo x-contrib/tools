@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Transformer</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Added Marked.js CDN -->
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0; /* Adjusted for full width */
+            padding: 20px; /* Add padding to body instead of margin */
+            display: flex;
+            gap: 20px;
+            min-height: calc(100vh - 40px); /* Ensure body takes full viewport height */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: calc(50% - 10px); /* Adjusted for 50/50 split considering the gap */
+            /* Allow containers to grow and fill available space if needed by textareas */
+        }
+        textarea { /* Removed .preview as it's no longer used */
+            width: 100%;
+            /* Adjusted height: 90vh minus estimations for h2, button, padding etc. */
+            height: calc(90vh - 80px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        .preview {
+            background-color: #f9f9f9;
+            overflow-y: auto;
+        }
+        h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Markdown Input</h2>
+        <textarea id="markdownInput" placeholder="Enter Markdown here..."></textarea>
+    </div>
+    <div class="container">
+        <h2>Transformed Output</h2>
+        <textarea id="transformedOutput" readonly placeholder="Transformed Markdown will appear here..."></textarea>
+        <button id="renderExternalPreviewButton" style="margin-top: 10px;">Live Preview</button>
+    </div>
+
+    <script>
+        const markdownInput = document.getElementById('markdownInput');
+        const transformedOutput = document.getElementById('transformedOutput');
+        const renderExternalPreviewButton = document.getElementById('renderExternalPreviewButton');
+
+        function transformMarkdown(markdown) {
+            let transformed = markdown;
+            // Rule 1: Replace “ or ” with `
+            transformed = transformed.replace(/“|”/g, '`');
+            // Rule 2: Replace ### with ##
+            transformed = transformed.replace(/###/g, '##');
+            return transformed;
+        }
+
+        markdownInput.addEventListener('input', () => {
+            const originalMarkdown = markdownInput.value;
+            const transformedMarkdown = transformMarkdown(originalMarkdown);
+            transformedOutput.value = transformedMarkdown;
+        });
+
+        markdownInput.addEventListener('scroll', () => {
+            const inputScrollableHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+            const outputScrollableHeight = transformedOutput.scrollHeight - transformedOutput.clientHeight;
+
+            if (inputScrollableHeight <= 0) { // No scrollbar on input or attempting to divide by zero
+                transformedOutput.scrollTop = 0; // Or some other default, like transformedOutput.scrollHeight
+                return;
+            }
+
+            const scrollPercentage = markdownInput.scrollTop / inputScrollableHeight;
+            transformedOutput.scrollTop = scrollPercentage * outputScrollableHeight;
+        });
+
+        renderExternalPreviewButton.addEventListener('click', () => {
+            const markdownToRender = transformedOutput.value;
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Markdown Preview</title>
+                    <style>body { font-family: sans-serif; margin: 20px; }</style>
+                </head>
+                <body>
+                    <div id="content"></div>
+                    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+                    <script>
+                        const md = ${JSON.stringify(markdownToRender)};
+                        document.getElementById('content').innerHTML = marked.parse(md);
+                    <\/script>
+                </body>
+                </html>
+            `);
+            previewWindow.document.close(); // Important for the new window to finish loading
+        });
+
+        // Initial transformation if there's any default text (though textarea is empty)
+        const initialMarkdown = markdownInput.value;
+        const initialTransformedMarkdown = transformMarkdown(initialMarkdown);
+        transformedOutput.value = initialTransformedMarkdown;
+    </script>
+</body>
+</html>
